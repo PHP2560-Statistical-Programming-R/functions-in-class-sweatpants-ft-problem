@@ -56,54 +56,6 @@ mean(some_normals)
 all.equal(formula_se_of_mean, mean.jackknife(some_normals))
 ```
 
-
-
-
-
-# Project Goals
-
-The goal of this project is to work through building functions around the Jackkinfe. We will start with some simple functions and then determine a pattern to build a more general function in the end. 
-
-
-## Jackknife of the Mean!
-
-- Have an estimator $\hat{\theta}$ of parameter $\theta$  
-  want the standard error of our estimate, $se_{\hat{\theta}}$
-- The jackknife approximation:
-    + omit case $i$, get estimate $\hat{\theta}_{(-i)}$
-    + Take the variance of all the $\hat{\theta}_{(-i)}$
-    + multiply that variance by $\frac{(n-1)^2}{n}$ to get $\approx$ variance of $\hat{\theta}$
-- then $se_{\hat{\theta}}=$ square root of that variance
-
-**PHP 2560 Only** (Why $(n-1)^2 / n$?  Think about just getting the standard
-    error of the mean)
-
-
-
-Write a function called `mean.jackknife` that takes argument `a_vector` and returns a jackknife estimate of the standard error.
-
-
-```{r, eval=FALSE}
-mean.jackknife <- function(a_vector) {
-  # Put your function in here
-  return(jackknife.stderr)
-}
-```
-
-
-
-#### Jackknife for the mean Example: test your code here
-
-
-```{r, eval = FALSE}
-some_normals <- rnorm(100,mean=7,sd=5)
-mean(some_normals)
-(formula_se_of_mean <- sd(some_normals)/sqrt(length(some_normals)))
-all.equal(formula_se_of_mean,mean.jackknife(some_normals))
-```
-
-
-
 ##Jackknife for Gamma Parameters
 
 
@@ -167,16 +119,12 @@ Write a function called `jackknife.lm` that takes arguments `df`, `formula` and 
 
 ```{r, eval=TRUE}
 jackknife.lm <- function(df, formula, p) {
-  df.lessi <- matrix(, nrow = dim(df)[1], ncol = p)
+  df.lessi <- matrix(nrow = dim(df)[1], ncol = p)
   for(i in 1:nrow(df)){
     df.lessi[i,] <- lm(formula, df[-i,])$coefficients
    }
   
-  jackknife.stderr <- c((sqrt(var(df.lessi[,1])*
-                                (((length(df.lessi[,1])-1)^2)/length(df.lessi[,1])))),
-                         (sqrt(var(df.lessi[,2])*
-                                 (((length(df.lessi[, 2])-1)^2)/length(df.lessi[, 2])))))
-
+  jackknife.stderr <- sqrt(apply(df.lessi,2,var)*((nrow(df.lessi)-1)^2/nrow(df.lessi)))
   return(jackknife.stderr)
 }
 
@@ -371,17 +319,6 @@ scale_and_sqrt_vars <- function(jackknife.ests, n) {
   var.of.reestimates <- apply(jackknife.ests, 1, var)
   jackknife.var <- ((n-1)^2/n)*var.of.reestimates
   jackknife.stderr <- sqrt(jackknife.var)
-=======
-    ```{r, eval=FALSE}
-      data_size <- function(the_data) {
-  
-      }
-    ```
-- Write a function that calculate the variance of all the estimates and returns the standard error
-```{r, eval=FALSE}
-scale_and_sqrt_vars <- function(jackknife.ests,n) {
-  
->>>>>>> 337a20c37b2f9ce45fdbc8f0036f6d2edcf38bdf
   return(jackknife.stderr)
 }
 ```
